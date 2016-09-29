@@ -14,22 +14,28 @@ var State = pc.createScript ('State');
 
 State.prototype.initialize = function ()
 {
-    if (window['PCState'])
-    {
-        var pcs = window['PCState'];
-        
-        // requesting and handling previously saved state if it exists
-        this.loadState (pcs.state);
-        
-        // adding handler for saving state upon container termination
-        pcs.addSaveHandler (this.saveState.bind(this));
-    }
-    
     // foo and bar are state variables we want to save and restore
     // they're usually supplied via event channels from other scripts
     
     this.app.on ('foo:updated', this.onFooUpdated, this);
     this.app.on ('bar:updated', this.onBarUpdated, this);
+};
+
+
+State.prototype.postInitialize = function ()
+{
+    if (window['PCState'])
+    {
+        var pcs = window['PCState'];
+        
+        // requesting and handling previously saved state if it exists
+        // doing that in postInitialize() is critical because other scripts
+        // will need to subscribe to 'state:loaded' event in initialize() first
+        this.loadState (pcs.state);
+        
+        // adding handler for saving state upon container termination
+        pcs.addSaveHandler (this.saveState.bind(this));
+    }
 };
 
 
